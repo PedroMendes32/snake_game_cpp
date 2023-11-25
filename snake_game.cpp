@@ -10,7 +10,9 @@ constexpr auto MAX_LINHAS = 10;
 constexpr auto MAX_COLUNAS = 20;
 
 char mapa[MAX_LINHAS][MAX_COLUNAS];
-bool acabou = false;
+HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
+WORD originalAttrs;
 
 class snake final
 {	
@@ -60,7 +62,30 @@ void show_map(void)
 	{
 		for (int j = 0; j < MAX_COLUNAS; j++)
 		{
-			std::cout << mapa[i][j];
+			switch (mapa[i][j])
+			{
+				case '*':
+					SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
+					std::cout << mapa[i][j];
+					break;
+				case '.':
+					SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
+					std::cout << mapa[i][j];
+					break;
+				case '#':
+					SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN | FOREGROUND_RED);
+					std::cout << mapa[i][j];
+					break;
+				case 'O':
+					SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE);
+					std::cout << mapa[i][j];
+					break;
+				case '@':
+					SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE);
+					std::cout << mapa[i][j];
+					break;
+				
+			}
 		}
 		std::cout << std::endl;
 	}
@@ -239,15 +264,23 @@ void move_snake(snake& s,char direction)
 
 }
 
+void reset_config(void)
+{
+	SetConsoleTextAttribute(hConsole, originalAttrs);
+}
+
 int main(void)
 {
+	GetConsoleScreenBufferInfo(hConsole, &consoleInfo);
+	originalAttrs = consoleInfo.wAttributes;
+
 	srand(time(NULL));
 	snake s;
 	build_map();
 	gera_fruta();
 	char jogada = 'D';
 
-	while (!acabou)
+	while (true)
 	{
 		show_map();
 		Sleep(DELAY);
@@ -268,6 +301,7 @@ int main(void)
 		aux_map();
 		rebuild_map();
 	}
+
 
 	return 0;
 }
